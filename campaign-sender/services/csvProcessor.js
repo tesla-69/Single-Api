@@ -4,6 +4,8 @@ const { sendViaSNS } = require('../../services/snsService');
 const { sendViaWhatsApp } = require('../../services/whatsappService');
 const { sendEmailViaSES } = require('../../services/sesService');
 const { buildEmailTemplate } = require('../../utils/emailTemplateBuilder');
+const { sendPushNotification } = require('../../services/fcmService');
+
 
 exports.processCSVAndSend = (filePath, message, defaultChannels = []) => {
   return new Promise((resolve, reject) => {
@@ -26,6 +28,9 @@ exports.processCSVAndSend = (filePath, message, defaultChannels = []) => {
             else if (ch === 'email' && email) {
                 const htmlBody = buildEmailTemplate(name, personalizedMsg);
                 await sendEmailViaSES(email, 'Your Campaign Message', personalizedMsg, htmlBody);
+              }
+              else if (ch === 'fcm' && row.fcmToken) {
+                await sendPushNotification(row.fcmToken, 'Govind Jewellers', personalizedMsg);
               }
             else status[ch] = 'unsupported';
 
